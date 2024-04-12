@@ -1,6 +1,7 @@
 ﻿
 using AutoMapper;
 using RestaurantAPI1.Entities;
+using RestaurantAPI1.Exceptions;
 
 namespace RestaurantAPI1.Services
 {
@@ -9,8 +10,8 @@ namespace RestaurantAPI1.Services
         int Create(CreateRestaurantDto dto);
         IEnumerable<RestaurantDto> GetAll();
         RestaurantDto GetById(int id);
-        bool Delete(int id);
-        bool Update(int id, UpdateRestaurantDto dto);
+        void Delete(int id);
+        void Update(int id, UpdateRestaurantDto dto);
     }
 
     public class RestaurantService : IRestaurantService
@@ -34,7 +35,7 @@ namespace RestaurantAPI1.Services
                 .Include(r => r.Dishes)
                 .FirstOrDefault(x => x.Id == id);
 
-            if (restaurant == null) return null;
+            if (restaurant == null) throw new NotFoundException("Restaurant not found");
 
             var result = _mapper.Map<RestaurantDto>(restaurant);
 
@@ -60,7 +61,7 @@ namespace RestaurantAPI1.Services
 
             return restaurant.Id;
         }
-        public bool Delete(int id)
+        public void Delete(int id)
         {
             _logger.LogError($"Restaurant with id: {id} DELETE action invoked");
             var restaurant = _dbContext
@@ -68,25 +69,23 @@ namespace RestaurantAPI1.Services
                 .FirstOrDefault(x => x.Id == id);
 
             if(restaurant == null)
-                return false;
+                throw new NotFoundException("Restaurant not found");
 
             _dbContext.Remove(restaurant);
             _dbContext.SaveChanges();
-            return true;
         }
-        public bool Update(int id, UpdateRestaurantDto dto)
+        public void Update(int id, UpdateRestaurantDto dto)
         {
             var restaurant = _dbContext.Restaurants
                 .FirstOrDefault(x => x.Id == id);
             if (restaurant == null)
-                return false;
+                throw new NotFoundException("Restaurant not found");
 
             restaurant.Name = dto.Name;
             restaurant.Description = dto.Description;
             restaurant.HasDelivery = dto.HasDelivery;
 
             _dbContext.SaveChanges();
-            return true;
         }
     }
 }
