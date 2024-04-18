@@ -39,6 +39,7 @@ namespace RestaurantAPI1.Controllers
 
             return Ok(restaurantsDto);
         }
+
         [HttpGet("{id}")]
         public ActionResult<RestaurantDto> Get([FromRoute]int id)
         {
@@ -46,6 +47,7 @@ namespace RestaurantAPI1.Controllers
 
             return Ok(restaurantDto);
         }
+
         [HttpPut("{id}")]
         public ActionResult Update([FromRoute]int id, [FromBody]UpdateRestaurantDto dto)
         {

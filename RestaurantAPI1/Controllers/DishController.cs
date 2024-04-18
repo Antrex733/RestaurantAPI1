@@ -1,6 +1,6 @@
 ﻿namespace RestaurantAPI1.Controllers
 {
-    [Route("api/{restaurantId}/dish")]
+    [Route("api/[controller]/{restaurantId}/dish")]
     [ApiController]
     public class DishController : ControllerBase
     {
@@ -10,7 +10,8 @@
         {
             _dishService = dishService;
         }
-        public ActionResult Post([FromRoute] int restaurantId, [FromBody] CreateDishDto dto)
+        [HttpPost]
+        public ActionResult PostDish([FromRoute] int restaurantId, [FromBody] CreateDishDto dto)
         {
             var newDishId = _dishService.Create(restaurantId, dto);
 

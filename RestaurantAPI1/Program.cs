@@ -10,13 +10,18 @@ builder.Logging.AddNLog();
 // Add services to the container.
 
 builder.Services.AddDbContext<RestaurantDbContext>();
+
 builder.Services.AddScoped<RestaurantSeeder>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 builder.Services.AddScoped<IDishService, DishService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
-builder.Services.AddSwaggerGen();
+
 builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
@@ -28,14 +33,17 @@ seeder.Seed();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Restaurant API");
-    });
+    app.UseSwaggerUI();
 }
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Restaurant API");
+});
 
 app.UseAuthorization();
 
