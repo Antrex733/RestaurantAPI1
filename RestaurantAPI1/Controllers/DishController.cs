@@ -10,6 +10,7 @@
         {
             _dishService = dishService;
         }
+        [HttpPost]
         public ActionResult Post([FromRoute] int restaurantId, [FromBody] CreateDishDto dto)
         {
             var newDishId = _dishService.Create(restaurantId, dto);
