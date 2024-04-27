@@ -6,6 +6,7 @@ namespace RestaurantAPI1.Services
     public interface IDishService
     {
         int Create(int restaurantId, CreateDishDto dto);
+        void RemoveAll(int restaurantId);
     }
     public class DishService : IDishService
     {
@@ -17,6 +18,8 @@ namespace RestaurantAPI1.Services
             _mapper = mapper;
             _context = context;
         }
+
+
         public int Create(int restaurantId, CreateDishDto dto)
         {
             var restaurant = _context.Restaurants.FirstOrDefault(r => r.Id == restaurantId);
@@ -29,6 +32,21 @@ namespace RestaurantAPI1.Services
             _context.SaveChanges();
 
             return dish.Id;
+        }
+
+        public void RemoveAll(int restaurantId)
+        {
+            var restaurant = _context
+                .Restaurants
+                .Include(r => r.Dishes)
+                .FirstOrDefault(r => r.Id == restaurantId);
+
+            if (restaurant == null)
+            {
+                throw new NotFoundException("Restaurant not found");
+            }
+            _context.RemoveRange(restaurant.Dishes);
+            _context.SaveChanges();
         }
     }
 }
