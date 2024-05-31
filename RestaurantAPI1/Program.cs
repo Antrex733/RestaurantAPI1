@@ -1,5 +1,6 @@
 
 
+using Microsoft.AspNetCore.Identity;
 using RestaurantAPI1.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,11 +16,8 @@ builder.Services.AddScoped<RestaurantSeeder>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IRestaurantService, RestaurantService>();
 builder.Services.AddScoped<IDishService, DishService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
-
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
