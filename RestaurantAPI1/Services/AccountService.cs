@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using RestaurantAPI1.Exceptions;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace RestaurantAPI1.Services
 {
@@ -13,6 +17,7 @@ namespace RestaurantAPI1.Services
     {
         private readonly RestaurantDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly AuthenticationSettings _authenticationSettings;
 
         public AccountService(RestaurantDbContext context, IPasswordHasher<User> passwordHasher)
         {
@@ -34,7 +39,33 @@ namespace RestaurantAPI1.Services
             {
                 throw new BadRequestException("Invalid username or password");
             }
+            var claims = new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+                new Claim(ClaimTypes.Role, $"{user.Role.Name}"),
+            };
+            if (user.DateOfBirth != null)
+            {
+                claims.Add(new Claim("DateOfBirth", user.DateOfBirth.Value.ToString("yyyy-MM-dd")));
+            }
+            if (user.Nationality != null)
+            {
+                claims.Add(new Claim("Nationality", user.Nationality));
+            }
 
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpireDays);
+
+            var token = new JwtSecurityToken(_authenticationSettings.JwtIssuer,
+                _authenticationSettings.JwtIssuer,
+                claims,
+                expires: expires,
+                signingCredentials: cred);
+
+            var tokenHendler = new JwtSecurityTokenHandler();
+            return tokenHendler.WriteToken(token);
         }
 
         public void RegisterUser(RegisterUserDto dto)
