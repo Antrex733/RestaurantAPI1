@@ -27,31 +27,35 @@ namespace RestaurantAPI1.Services
 
         public string GenerateJwt(LoginDto dto)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == dto.Email);
+            var user = _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefault(u => u.Email == dto.Email);
 
-            if (user == null)
+            if (user is null)
             {
                 throw new BadRequestException("Invalid username or password");
             }
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
-            if(result == PasswordVerificationResult.Failed)
+            if (result == PasswordVerificationResult.Failed)
             {
                 throw new BadRequestException("Invalid username or password");
             }
+
             var claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
                 new Claim(ClaimTypes.Role, $"{user.Role.Name}"),
+                new Claim("DateOfBirth", user.DateOfBirth.Value.ToString("yyyy-MM-dd")),
+
             };
-            if (user.DateOfBirth != null)
+
+            if (!string.IsNullOrEmpty(user.Nationality))
             {
-                claims.Add(new Claim("DateOfBirth", user.DateOfBirth.Value.ToString("yyyy-MM-dd")));
-            }
-            if (user.Nationality != null)
-            {
-                claims.Add(new Claim("Nationality", user.Nationality));
+                claims.Add(
+                    new Claim("Nationality", user.Nationality)
+                    );
             }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
@@ -64,8 +68,9 @@ namespace RestaurantAPI1.Services
                 expires: expires,
                 signingCredentials: cred);
 
-            var tokenHendler = new JwtSecurityTokenHandler();
-            return tokenHendler.WriteToken(token);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            return tokenHandler.WriteToken(token);
+
         }
 
         public void RegisterUser(RegisterUserDto dto)
