@@ -19,10 +19,11 @@ namespace RestaurantAPI1.Services
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AuthenticationSettings _authenticationSettings;
 
-        public AccountService(RestaurantDbContext context, IPasswordHasher<User> passwordHasher)
+        public AccountService(RestaurantDbContext context, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings1)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _authenticationSettings = authenticationSettings1; 
         }
 
         public string GenerateJwt(LoginDto dto)
@@ -81,7 +82,6 @@ namespace RestaurantAPI1.Services
                 DateOfBirth = dto.DateOfBirth,
                 Nationality = dto.Nationality,
                 RoleId = dto.RoleId
-                
             };
 
             var hashedPassword = _passwordHasher.HashPassword(newUser, dto.Password);

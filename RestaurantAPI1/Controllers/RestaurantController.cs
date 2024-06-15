@@ -34,7 +34,8 @@ namespace RestaurantAPI1.Controllers
 
             return Created($"/api/restaurants/{id}", null);
         }
-
+        
+        [AllowAnonymous]
         [HttpGet]
         public ActionResult<IEnumerable<RestaurantDto>> GetAll()
         {
