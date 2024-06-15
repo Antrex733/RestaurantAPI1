@@ -16,5 +16,10 @@
             _accountService.RegisterUser(dto);
             return Ok();
         }
+        [HttpPost]
+        public ActionResult Login([FromBody] LoginDto dto)
+        {
+            string token = _accountService.GenerateJwt(dto);
+        }
     }
 }
